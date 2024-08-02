@@ -1,7 +1,14 @@
 package com.assignment.TaskManagementSystem.models;
 
-public enum UserRole {
 
-    ADMIN,
-    USER
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class UserRole extends BaseModel{
+
+    private String role;
 }
