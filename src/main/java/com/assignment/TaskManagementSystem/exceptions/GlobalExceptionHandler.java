@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, RoleNotFoundException.class})
     public ResponseEntity<ExceptionDto> handleNotFoundException(Exception exception) {
 
         String message;
@@ -20,12 +20,36 @@ public class GlobalExceptionHandler {
             message = userNotFoundException.getMessage();
             status = HttpStatus.NOT_FOUND;
         }
+        else if (exception instanceof RoleNotFoundException) {
+            RoleNotFoundException roleNotFoundException = (RoleNotFoundException) exception;
+            message = roleNotFoundException.getMessage();
+            status = HttpStatus.NOT_FOUND;
+        }
         else {
             message = "An unexpected error occurred.";
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
         return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({RoleAlreadyPresentException.class})
+    public ResponseEntity<ExceptionDto> handlePresentException(Exception exception) {
+
+        String message;
+        HttpStatus status;
+
+        if (exception instanceof RoleAlreadyPresentException) {
+            RoleAlreadyPresentException roleAlreadyPresentException = (RoleAlreadyPresentException) exception;
+            message = roleAlreadyPresentException.getMessage();
+            status = HttpStatus.ALREADY_REPORTED;
+        }
+        else {
+            message = "An unexpected error occurred.";
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.ALREADY_REPORTED);
     }
 
 }

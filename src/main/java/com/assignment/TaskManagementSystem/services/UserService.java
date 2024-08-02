@@ -1,5 +1,6 @@
 package com.assignment.TaskManagementSystem.services;
 
+import com.assignment.TaskManagementSystem.dtos.SetUserRolesRequestDto;
 import com.assignment.TaskManagementSystem.dtos.UserDto;
 import com.assignment.TaskManagementSystem.models.User;
 import org.springframework.http.ResponseEntity;
@@ -13,4 +14,6 @@ public interface UserService {
     UserDto getUserDetailsById(String userId);
 
     List<UserDto> getAllUsers();
+
+    UserDto setUserRoles(String userId, SetUserRolesRequestDto setUserRolesRequestDto);
 }
