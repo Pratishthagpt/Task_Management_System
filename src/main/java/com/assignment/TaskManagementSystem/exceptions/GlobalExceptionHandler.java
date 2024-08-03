@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, RoleNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, RoleNotFoundException.class, SessionNotFoundException.class, TaskNotFoundException.class})
     public ResponseEntity<ExceptionDto> handleNotFoundException(Exception exception) {
 
         String message;
@@ -23,6 +23,16 @@ public class GlobalExceptionHandler {
         else if (exception instanceof RoleNotFoundException) {
             RoleNotFoundException roleNotFoundException = (RoleNotFoundException) exception;
             message = roleNotFoundException.getMessage();
+            status = HttpStatus.NOT_FOUND;
+        }
+        else if (exception instanceof TaskNotFoundException) {
+            TaskNotFoundException taskNotFoundException = (TaskNotFoundException) exception;
+            message = taskNotFoundException.getMessage();
+            status = HttpStatus.NOT_FOUND;
+        }
+        else if (exception instanceof SessionNotFoundException) {
+            SessionNotFoundException sessionNotFoundException = (SessionNotFoundException) exception;
+            message = sessionNotFoundException.getMessage();
             status = HttpStatus.NOT_FOUND;
         }
         else {
@@ -52,7 +62,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.ALREADY_REPORTED);
     }
 
-    @ExceptionHandler({InvalidPasswordException.class})
+    @ExceptionHandler({InvalidPasswordException.class, InvalidTokenException.class})
     public ResponseEntity<ExceptionDto> handleInvalidEntryException (Exception e) {
         String message;
         HttpStatus status;
@@ -74,14 +84,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(SessionHasExpiredException.class)
-    public ResponseEntity<ExceptionDto> handleExpiredException (Exception e) {
+    @ExceptionHandler({SessionHasExpiredException.class, UnauthorizedUserAccessException.class})
+    public ResponseEntity<ExceptionDto> handleUnAuthorizedException (Exception e) {
         String message;
         HttpStatus status;
 
         if (e instanceof SessionHasExpiredException) {
             SessionHasExpiredException sessionHasExpiredException = (SessionHasExpiredException) e;
             message = sessionHasExpiredException.getMessage();
+            status = HttpStatus.UNAUTHORIZED;
+        }
+        else if (e instanceof UnauthorizedUserAccessException) {
+            UnauthorizedUserAccessException unauthorizedUserAccessException = (UnauthorizedUserAccessException) e;
+            message = unauthorizedUserAccessException.getMessage();
             status = HttpStatus.UNAUTHORIZED;
         }
         else {

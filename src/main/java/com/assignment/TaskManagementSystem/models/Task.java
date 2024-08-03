@@ -28,4 +28,6 @@ public class Task extends BaseModel{
 
     @ManyToOne(cascade = CascadeType.ALL)
     private User user;
+
+    private String priority;
 }
