@@ -1,5 +1,6 @@
 package com.assignment.TaskManagementSystem.services;
 
+import com.assignment.TaskManagementSystem.dtos.DueDateRequestDto;
 import com.assignment.TaskManagementSystem.dtos.TaskDTO;
 import com.assignment.TaskManagementSystem.exceptions.TaskNotFoundException;
 import com.assignment.TaskManagementSystem.exceptions.UnauthorizedUserAccessException;
@@ -187,6 +188,71 @@ public class TaskServiceImpl implements TaskService{
                 break;
             }
         }
+    }
+
+    @Override
+    public List<TaskDTO> getAllTasksByStatus(String token, String status) {
+
+//        getting all the tasks by user
+        List<TaskDTO> allTasks = getAllTasksByUser(token);
+
+        List<TaskDTO> filteredTasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : allTasks) {
+            if (taskDTO.getStatus().equalsIgnoreCase(status)) {
+                filteredTasks.add(taskDTO);
+            }
+        }
+        return filteredTasks;
+    }
+
+    @Override
+    public List<TaskDTO> getAllTasksByPriority(String token, String priority) {
+
+//        getting all the tasks by user
+        List<TaskDTO> allTasks = getAllTasksByUser(token);
+
+        List<TaskDTO> filteredTasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : allTasks) {
+            if (taskDTO.getPriority().equalsIgnoreCase(priority)) {
+                filteredTasks.add(taskDTO);
+            }
+        }
+        return filteredTasks;
+    }
+
+    @Override
+    public List<TaskDTO> getAllTasksBeforeDueDate(String token, DueDateRequestDto requestDto) {
+
+//        getting all the tasks by user
+        List<TaskDTO> allTasks = getAllTasksByUser(token);
+
+        List<TaskDTO> filteredTasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : allTasks) {
+//            if task due date is less than the requested due date
+            if (taskDTO.getDueDate().compareTo(requestDto.getDueDate()) < 1) {
+                filteredTasks.add(taskDTO);
+            }
+        }
+        return filteredTasks;
+    }
+
+    @Override
+    public List<TaskDTO> getAllTasksByTitle(String token, String title) {
+
+//        getting all the tasks by user
+        List<TaskDTO> allTasks = getAllTasksByUser(token);
+
+        List<TaskDTO> filteredTasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : allTasks) {
+            if (taskDTO.getTitle().equalsIgnoreCase(title)) {
+                filteredTasks.add(taskDTO);
+            }
+        }
+        return filteredTasks;
     }
 
     private TaskDTO convertTaskToTaskDTO (Task task) {
