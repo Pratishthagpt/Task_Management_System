@@ -1,5 +1,8 @@
 # Task Management System
 
+The Task Management System involves a set of RESTful APIs to manage user authentication, task management, role management, and user management.
+
+
 ## Instructions to Run the Application Locally
 
 Follow these steps to get the application up and running on your local machine:
