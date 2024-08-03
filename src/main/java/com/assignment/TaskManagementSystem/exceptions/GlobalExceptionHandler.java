@@ -62,11 +62,34 @@ public class GlobalExceptionHandler {
             message = invalidPasswordException.getMessage();
             status = HttpStatus.BAD_REQUEST;
         }
+        else if (e instanceof InvalidTokenException) {
+            InvalidTokenException invalidTokenException = (InvalidTokenException) e;
+            message = invalidTokenException.getMessage();
+            status = HttpStatus.BAD_REQUEST;
+        }
         else {
             message = "An unexpected error occurred.";
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SessionHasExpiredException.class)
+    public ResponseEntity<ExceptionDto> handleExpiredException (Exception e) {
+        String message;
+        HttpStatus status;
+
+        if (e instanceof SessionHasExpiredException) {
+            SessionHasExpiredException sessionHasExpiredException = (SessionHasExpiredException) e;
+            message = sessionHasExpiredException.getMessage();
+            status = HttpStatus.UNAUTHORIZED;
+        }
+        else {
+            message = "An unexpected error occurred.";
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.UNAUTHORIZED);
     }
 
 }

@@ -4,16 +4,17 @@ import com.assignment.TaskManagementSystem.dtos.LoginRequestDto;
 import com.assignment.TaskManagementSystem.dtos.LogoutRequestDto;
 import com.assignment.TaskManagementSystem.dtos.SignUpRequestDto;
 import com.assignment.TaskManagementSystem.dtos.UserDto;
-import com.assignment.TaskManagementSystem.exceptions.InvalidPasswordException;
-import com.assignment.TaskManagementSystem.exceptions.SessionNotFoundException;
-import com.assignment.TaskManagementSystem.exceptions.UserNotFoundException;
+import com.assignment.TaskManagementSystem.exceptions.*;
 import com.assignment.TaskManagementSystem.models.Session;
 import com.assignment.TaskManagementSystem.models.SessionStatus;
 import com.assignment.TaskManagementSystem.models.User;
 import com.assignment.TaskManagementSystem.models.UserRole;
 import com.assignment.TaskManagementSystem.repositories.SessionRepository;
 import com.assignment.TaskManagementSystem.repositories.UserRepository;
+import com.assignment.TaskManagementSystem.security.model.UserJwtData;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -157,5 +158,61 @@ public class AuthServiceImpl implements AuthService {
         session.setStatus(SessionStatus.ENDED);
 
         sessionRepository.save(session);
+    }
+
+    public UserJwtData validateUserToken(String token) {
+
+        Optional<Session> sessionOptional = sessionRepository.findByToken(token);
+
+        if (sessionOptional.isEmpty()) {
+            throw new SessionNotFoundException("Session not found, please login again.");
+        }
+
+        Session session = sessionOptional.get();
+
+//        If session is ended, don't need to check for token and expiry time
+        if (!session.getStatus().equals(SessionStatus.ACTIVE)) {
+            throw new SessionNotFoundException("Session has expired, please login again.");
+        }
+
+        UserJwtData userJwtData = new UserJwtData();
+        try {
+            Jws<Claims> claimsJwt = Jwts
+                    .parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token);
+
+            String userId = claimsJwt.getPayload().get("userId").toString();
+
+            Optional<User> userOptional = userRepository.findById(UUID.fromString(userId));
+            User user = userOptional.get();
+
+            String username = claimsJwt.getPayload().get("username").toString();
+            List<String> rolesAsString = (List<String>) claimsJwt.getPayload().get("roles");
+
+            Set<UserRole> roles = new HashSet<>();
+            for (String userRole : rolesAsString) {
+                UserRole role = new UserRole();
+                role.setRole(userRole);
+                roles.add(role);
+            }
+
+            Long expiryAt = (Long) claimsJwt.getPayload().get("expiryAt");
+
+            //        checking for the accessing token time (current time) is greater than the expiry date
+            if (new Date().toInstant().toEpochMilli() > expiryAt) {
+                throw new SessionHasExpiredException("Session has expired, please login again.");
+            }
+
+            userJwtData.setId(user.getId().toString());
+            userJwtData.setUsername(username);
+            userJwtData.setRoleList(roles);
+        }
+        catch (JwtException e) {
+            throw new InvalidTokenException("Token is invalid, please login again.");
+        }
+
+        return userJwtData;
     }
 }
