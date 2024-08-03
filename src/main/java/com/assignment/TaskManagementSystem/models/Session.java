@@ -13,6 +13,7 @@ import java.util.Date;
 @Setter
 public class Session extends BaseModel{
 
+    @Column(name = "token", length = 2048)
     private String token;
 
     @ManyToOne

@@ -52,4 +52,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.ALREADY_REPORTED);
     }
 
+    @ExceptionHandler({InvalidPasswordException.class})
+    public ResponseEntity<ExceptionDto> handleInvalidEntryException (Exception e) {
+        String message;
+        HttpStatus status;
+
+        if (e instanceof InvalidPasswordException) {
+            InvalidPasswordException invalidPasswordException = (InvalidPasswordException) e;
+            message = invalidPasswordException.getMessage();
+            status = HttpStatus.BAD_REQUEST;
+        }
+        else {
+            message = "An unexpected error occurred.";
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(new ExceptionDto(message, status), HttpStatus.BAD_REQUEST);
+    }
+
 }
